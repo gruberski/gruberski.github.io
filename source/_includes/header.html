@@ -10,8 +10,9 @@
 	</script>
 	{% endif %}
 </div>
+
 {% include custom/header.html %}
-<nav id="main-nav">{% include navigation.html %}</nav>
+
 <nav id="sub-nav">
 	<div class="social">
 		{% if site.email %}
@@ -19,6 +20,9 @@
 		{% endif %}
 		{% if site.facebook_user %}
 			<a class="facebook" href="http://www.facebook.com/{{ site.facebook_user }}" title="Facebook">Facebook</a>
+		{% endif %}
+		{% if site.goldenline_user %}
+			<a class="goldenline" href="http://www.goldenline.pl/{{ site.goldenline_user }}" title="GoldenLine">GoldenLine</a>
 		{% endif %}
 		{% if site.googleplus_user and site.googleplus_hidden == false %}
 			<a class="google" href="https://plus.google.com/{{ site.googleplus_user }}" rel="author" title="Google+">Google+</a>
@@ -64,3 +68,16 @@
 		{% endif %}
 	</div>
 </nav>
+
+<nav id="main-nav">{% include navigation.html %}</nav>
+
+{% if site.simple_search %}
+<nav id="search-nav">
+    <section>
+        <form action="{{ site.simple_search }}" method="get">
+            <input type="hidden" name="q" value="site:{{ site.url | shorthand_url }}" />
+            <input class="search" type="search" name="q" results="0" placeholder="Szukaj"/>
+        </form>
+    </section>
+</nav>
+{% endif %}
