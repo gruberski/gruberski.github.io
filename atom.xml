@@ -4,13 +4,26 @@
   <title><![CDATA[Robert Gruberski]]></title>
   <link href="http://gruberski.github.io/atom.xml" rel="self"/>
   <link href="http://gruberski.github.io/"/>
-  <updated>2014-06-20T10:10:39+02:00</updated>
+  <updated>2014-06-20T13:50:38+02:00</updated>
   <id>http://gruberski.github.io/</id>
   <author>
     <name><![CDATA[Robert]]></name>
-    
+    <email><![CDATA[robert@gruberski.pl]]></email>
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Na dobry początek]]></title>
+    <link href="http://gruberski.github.io/blog/2014/06/19/na-dobry-poczatek/"/>
+    <updated>2014-06-19T12:05:49+02:00</updated>
+    <id>http://gruberski.github.io/blog/2014/06/19/na-dobry-poczatek</id>
+    <content type="html"><![CDATA[<p>Nastał w końcu dzień w którym postanowiłem ziścić dawne postanowienie i rozpocząłem tworzenie własnego bloga. Będę starał się w miarę systematycznie publikować interesujące treści, głównie z zakresu programowania w języku Java i testowania. Zapraszam do czytania oraz dyskusji w komentarzach. Mam nadzieję że treści jakie będę publikować okażą się interesujące, a blog ten stanie się miejscem ciekawych dyskusji.</p>
+
+<p>Już niedługo opublikuje pierwszy merytoryczny wpis dotyczący testowania, będzie on dotyczył biblioteki JaCoCo (<a href="http://www.eclemma.org/jacoco/">http://www.eclemma.org/jacoco/</a>) która dba aby tworzony przez nas kod był odpowiednio pokryty testami.</p>
+
+<p>Jeszcze raz zapraszam do odwiedzania bloga.</p>
+]]></content>
+  </entry>
   
 </feed>
