@@ -1,24 +1,136 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Robert Gruberski]]></title>
-  <link href="http://gruberski.github.io/atom.xml" rel="self"/>
-  <link href="http://gruberski.github.io/"/>
-  <updated>2014-06-25T10:24:13+02:00</updated>
-  <id>http://gruberski.github.io/</id>
-  <author>
-    <name><![CDATA[Robert Gruberski]]></name>
-    <email><![CDATA[robert@gruberski.pl]]></email>
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+<!DOCTYPE HTML>
 
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>JaCoCo, JUnit + Maven - badanie pokrycia testami :: Robert Gruberski - Notatnik Pragmatycznego Programisty</title>
+	<meta name="author" content="Robert Gruberski">
+
+	
+	<meta name="description" content="Integracja narzędzia JaCoCo do badania pokrycia kodu testami z Maven`em">
+	<meta name="keywords" content="java, junit, tests, testy, jednostkowe, integracyjne, jacoco, jenkins, maven">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Robert Gruberski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gruberski.github.io/blog/2014/06/23/jacoco-junit-maven-badanie-pokrycia-testami/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<!--Fonts from Google"s Web font directory at http://google.com/webfonts
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
   
-  <entry>
-    <title type="html"><![CDATA[JaCoCo, JUnit + Maven - badanie pokrycia testami]]></title>
-    <link href="http://gruberski.github.io/blog/2014/06/23/jacoco-junit-maven-badanie-pokrycia-testami/"/>
-    <updated>2014-06-23T18:24:36+02:00</updated>
-    <id>http://gruberski.github.io/blog/2014/06/23/jacoco-junit-maven-badanie-pokrycia-testami</id>
-    <content type="html"><![CDATA[<p>Pisanie dobrego kodu wymaga od programisty równoległego pisania testów, istotne jest aby testy pokrywały jak najwięcej tworzonego kodu. Nie trudno, podczas pisania testów pominąć fragment kodu, co w przyszłości może przysporzyć sporo problemów i być powodem frustracji programisty. Na szczęście z pomocą przychodzą narzędzia do badania pokrycia kodu testami takie jak <a href="http://www.eclemma.org/jacoco/">JaCoCo</a>, którego zastosowanie chciałbym dzisiaj zaprezentować.</p>
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-6646956-5']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<script src="/javascripts/md5.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			$('.profilepic').append("<img src='http://www.gravatar.com/avatar/" + MD5("robert@gruberski.pl") + "?s=160' alt='Profile Picture' style='width: 160px;' />");
+		});
+	</script>
+	
+</div>
+
+<hgroup>
+  <h1><a href="/">Robert Gruberski</a></h1>
+  
+    <p class="subtitle">Notatnik Pragmatycznego Programisty</p>
+  
+</hgroup>
+
+
+<nav id="sub-nav">
+	<div class="social">
+		
+			<a class="email" href="mailto:robert@gruberski.pl" title="Email">Email</a>
+		
+		
+		
+			<a class="goldenline" href="http://www.goldenline.pl/robert-gruberski" title="GoldenLine">GoldenLine</a>
+		
+		
+		
+		
+			<a class="github" href="https://github.com/gruberski" title="GitHub">GitHub</a>
+		
+		
+		
+		
+			<a class="linkedin" href="http://www.linkedin.com/in/rgruberski" title="LinkedIn">LinkedIn</a>
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<nav id="main-nav"><ul class="main">
+    <li><a href="/">Blog</a></li>
+    <li><a href="/about">O mnie</a></li>
+    <h4><li><a href="/blog/categories">Kategorie</a></li></h4>
+    <li><a href="/blog/archives">Archiwum</a></li>
+</ul>
+</nav>
+
+
+<nav id="search-nav">
+    <section>
+        <form action="https://www.google.com/search" method="get">
+            <input type="hidden" name="q" value="site:gruberski.github.io" />
+            <input class="search" type="search" name="q" results="0" placeholder="Szukaj"/>
+        </form>
+    </section>
+</nav>
+
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 class="title" itemprop="name">JaCoCo, JUnit + Maven - Badanie Pokrycia Testami</h1>
+	<div class="entry-content" itemprop="articleBody"><p>Pisanie dobrego kodu wymaga od programisty równoległego pisania testów, istotne jest aby testy pokrywały jak najwięcej tworzonego kodu. Nie trudno, podczas pisania testów pominąć fragment kodu, co w przyszłości może przysporzyć sporo problemów i być powodem frustracji programisty. Na szczęście z pomocą przychodzą narzędzia do badania pokrycia kodu testami takie jak <a href="http://www.eclemma.org/jacoco/">JaCoCo</a>, którego zastosowanie chciałbym dzisiaj zaprezentować.</p>
 
 <p>Przedmiotem dzisiejszego wpisu jest integracja narzędzia <a href="http://www.eclemma.org/jacoco/">JaCoCo</a> z <a href="http://maven.apache.org/">Maven</a> oraz rozdzielenie testów jednostkowych od integracyjnych. Dlaczego rozdzielenie testów jednostkowych i integracyjnych jest takie ważne? Głównym argumentem przemawiającym na korzyść rozdzielenia testów jest czas potrzebny na ich przeprowadzenie. Testy jednostkowe z reguły trwają krótko i są stosowane do testowania poszczególnych metod lub fragmentów kodu. Testy integracyjne natomiast badają złożone procesy, przez co czas ich wykonania ulega znacznemu wydłużeniu.</p>
 
@@ -492,14 +604,14 @@ mvn clean verify # uruchamianie testów jednostkowych i integracyjnych wraz z ge
 
 <p>Jeżeli konfiguracja została wykonana poprawnie i testy przebiegły pomyślnie, w katalogu <i>target/site</i> projektu powinny być dostępne raporty pokrycia kodu testami. Raporty dla testów jednostkowych i integracyjnych będą znajdowały się w osobnych folderach, których nazwy podaliśmy przy konfiguracji <a href="http://www.eclemma.org/jacoco/trunk/doc/maven.html">JaCoCo Maven Plugin</a>.</p>
 
-<p><img class="center" src="http://gruberski.github.io/images/jacoco-cc1.jpg"></p>
+<p><img class="center" src="/images/jacoco-cc1.jpg"></p>
 
 <p>Jeżeli chcemy zapoznać się ze szczegółowym pokryciem kodu testami dla poszczególnych klas, wystarczy przeklikać strukturę projektu zaczynając od głównego pakietu (w tym przypadku <i>pl.gruberski</i>).</p>
 
 <br />
 
 
-<p><img class="center" src="http://gruberski.github.io/images/jacoco-cc2.jpg"></p>
+<p><img class="center" src="/images/jacoco-cc2.jpg"></p>
 
 <p>Powyższy obrazek pokazuje, że kod klasy został w dużym stopniu pokryty testami. Brakuje jednak testu dla przypadku, w którym metoda rzuci wyjątek <i>IllegalArgumentException</i>.</p>
 
@@ -515,20 +627,75 @@ mvn clean verify # uruchamianie testów jednostkowych i integracyjnych wraz z ge
 Jest to mój pierwszy merytoryczny wpis, więc z góry przepraszam za błędy lub niejasne opisy. Postaram się, aby z każdym kolejnym wpisem było tylko lepiej.</p>
 
 <p>Cały projekt znajduje się w rapozytorium pod adresem <a href="https://github.com/gruberski/jacoco-code-coverage">https://github.com/gruberski/jacoco-code-coverage</a>.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Na dobry początek]]></title>
-    <link href="http://gruberski.github.io/blog/2014/06/19/na-dobry-poczatek/"/>
-    <updated>2014-06-19T12:05:49+02:00</updated>
-    <id>http://gruberski.github.io/blog/2014/06/19/na-dobry-poczatek</id>
-    <content type="html"><![CDATA[<p>Nastał w końcu dzień w którym postanowiłem ziścić dawne postanowienie i rozpocząłem tworzenie własnego bloga. Będę starał się w miarę systematycznie publikować interesujące treści, głównie z zakresu programowania w języku Java i testowania. Zapraszam do czytania oraz dyskusji w komentarzach. Mam nadzieję że treści jakie będę publikować okażą się interesujące, a blog ten stanie się miejscem ciekawych dyskusji.</p>
+</div>
 
-<p>Już niedługo opublikuje pierwszy merytoryczny wpis dotyczący testowania, będzie on dotyczył biblioteki JaCoCo (<a href="http://www.eclemma.org/jacoco/">http://www.eclemma.org/jacoco/</a>) która dba aby tworzony przez nas kod był odpowiednio pokryty testami.</p>
+</article>
 
-<p>Jeszcze raz zapraszam do odwiedzania bloga.</p>
-]]></content>
-  </entry>
-  
-</feed>
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+				<footer id="footer" class="inner"><p>
+  Copyright &copy; 2014 - Robert Gruberski -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+			</div>
+			
+		</div>
+	</div>
+	
+
+<script type="text/javascript">
+      var disqus_shortname = 'rgruberski';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gruberski.github.io/blog/2014/06/23/jacoco-junit-maven-badanie-pokrycia-testami/';
+        var disqus_url = 'http://gruberski.github.io/blog/2014/06/23/jacoco-junit-maven-badanie-pokrycia-testami/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+</body>
+</html>

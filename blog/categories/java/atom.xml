@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Java | Robert Gruberski]]></title>
+  <link href="http://gruberski.github.io/blog/categories/java/atom.xml" rel="self"/>
+  <link href="http://gruberski.github.io/"/>
+  <updated>2014-06-25T10:24:13+02:00</updated>
+  <id>http://gruberski.github.io/</id>
+  <author>
+    <name><![CDATA[Robert Gruberski]]></name>
+    <email><![CDATA[robert@gruberski.pl]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[JaCoCo, JUnit + Maven - badanie pokrycia testami]]></title>
+    <link href="http://gruberski.github.io/blog/2014/06/23/jacoco-junit-maven-badanie-pokrycia-testami/"/>
+    <updated>2014-06-23T18:24:36+02:00</updated>
+    <id>http://gruberski.github.io/blog/2014/06/23/jacoco-junit-maven-badanie-pokrycia-testami</id>
+    <content type="html"><![CDATA[<p>Pisanie dobrego kodu wymaga od programisty równoległego pisania testów, istotne jest aby testy pokrywały jak najwięcej tworzonego kodu. Nie trudno, podczas pisania testów pominąć fragment kodu, co w przyszłości może przysporzyć sporo problemów i być powodem frustracji programisty. Na szczęście z pomocą przychodzą narzędzia do badania pokrycia kodu testami takie jak <a href="http://www.eclemma.org/jacoco/">JaCoCo</a>, którego zastosowanie chciałbym dzisiaj zaprezentować.</p>
+
+<p>Przedmiotem dzisiejszego wpisu jest integracja narzędzia <a href="http://www.eclemma.org/jacoco/">JaCoCo</a> z <a href="http://maven.apache.org/">Maven</a> oraz rozdzielenie testów jednostkowych od integracyjnych. Dlaczego rozdzielenie testów jednostkowych i integracyjnych jest takie ważne? Głównym argumentem przemawiającym na korzyść rozdzielenia testów jest czas potrzebny na ich przeprowadzenie. Testy jednostkowe z reguły trwają krótko i są stosowane do testowania poszczególnych metod lub fragmentów kodu. Testy integracyjne natomiast badają złożone procesy, przez co czas ich wykonania ulega znacznemu wydłużeniu.</p>
+
+<p>Tyle słowem wstępu, czas przejść do praktycznego zastosowania.</p>
+
+<!-- MORE -->
+
+
+<h3>Tworzenie projektu</h3>
+
+<p>Zaczynajmy! Na początek utworzę nowy projekt za pomocą <a href="http://maven.apache.org/">Maven`a</a>. Osobiście jestem zwolennikiem wiersza poleceń, więc utworzę projekt za pomocą poniższego polecenia i zaimportuje go do <a href="http://www.eclipse.org/">Eclipse</a>. Moje podejście to kwestia indywidualnych upodobań, także nic nie stoi na przeszkodzie, aby projekt utworzyć za pomocą dowolnego IDE.</p>
+
+<pre><code>mvn archetype:generate -DgroupId=pl.gruberski -DartifactId=jacoco-code-coverage -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+</code></pre>
+
+<h3>Dodatkowy katalog dla testów integracyjnych</h3>
+
+<p>Aby projekt był bardziej czytelny i lepiej uporządkowany, proponuje fizycznie rozdzielić testy jednostkowe od integracyjnych. Często w przykładach testy rozdzielane są na podstawie nazwy klasy lub implementowanego interfejsu. Uważam jednak, że fizyczne rozmieszczenie testów w osobnych folderach znacznie poprawia porządek i ułatwia pracę z projektem.</p>
+
+<p>Rozdzielenie można zrealizować za pomocą pluginu do <a href="http://maven.apache.org/">Maven`a</a> <a href="http://mojo.codehaus.org/build-helper-maven-plugin/">Build Helper Maven Plugin</a>, dzięki któremu możliwe jest dodanie dodatkowych katalogów do projektu. Moje testy integracyjne trafią to katalogu &ldquo;src/integration-test/java&rdquo;. Konfiguracja pluginu ogranicza się do dodania następującego wpisu do pliku pom.xml:</p>
+
+<p>``` xml</p>
+
+<p><build></p>
+
+<pre><code>&lt;plugins&gt;
+...
+&lt;plugin&gt;
+    &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+    &lt;artifactId&gt;build-helper-maven-plugin&lt;/artifactId&gt;
+    &lt;version&gt;1.9&lt;/version&gt;
+    &lt;executions&gt;
+        &lt;execution&gt;
+            &lt;id&gt;add-integration-test-source&lt;/id&gt;
+            &lt;phase&gt;generate-test-sources&lt;/phase&gt;
+            &lt;goals&gt;
+                &lt;goal&gt;add-test-source&lt;/goal&gt;
+            &lt;/goals&gt;
+            &lt;configuration&gt;
+                &lt;sources&gt;
+                    &lt;source&gt;src/integration-test/java&lt;/source&gt;
+                &lt;/sources&gt;
+            &lt;/configuration&gt;
+        &lt;/execution&gt;
+    &lt;/executions&gt;
+&lt;/plugin&gt;
+...
+&lt;/plugins&gt;
+</code></pre>
+
+<p></build></p>
+
+<p>```</p>
+
+<h3>Dodawanie pluginu JaCoCo do konfiguracji Maven`a</h3>
+
+<p>Integrację rozpoczynamy od dodania pluginu <a href="http://www.eclemma.org/jacoco/trunk/doc/maven.html">JaCoCo Maven Plugin</a> do konfiguracji <a href="http://maven.apache.org/">Maven`a</a>. W tym celu należy dodać poniższy wpis do pliku pom.xml:</p>
+
+<p>``` xml</p>
+
+<p><build></p>
+
+<pre><code>&lt;plugins&gt;
+...
+&lt;plugin&gt;
+    &lt;groupId&gt;org.jacoco&lt;/groupId&gt;
+    &lt;artifactId&gt;jacoco-maven-plugin&lt;/artifactId&gt;
+    &lt;version&gt;0.7.1.201405082137&lt;/version&gt;
+&lt;/plugin&gt;
+...
+&lt;/plugins&gt;
+</code></pre>
+
+<p></build></p>
+
+<p>```</p>
+
+<h3>Konfiguracja raportów dla testów jednostkowych i integracyjnych</h3>
+
+<p>Plugin JaCoCo należy skonfigurować, aby generował dwa rodzaje raportów, osobny dla testów jednostkowych i osobny dla testów integracyjnych. Generowanie raportu odbywa się w dwóch etapach. Pierwszy etap zbiera dane na temat pokrycia testami i zapisuje wyniki do pliku, drugi generuje raport i zapisuje go w kilku ustandaryzowanych formatach (html, csv, xml).</p>
+
+<p>Konfiguracje należy dodać do sekcji <i>executions</i> pluginu <a href="http://www.eclemma.org/jacoco/trunk/doc/maven.html">JaCoCo Maven Plugin</a> w pliku pom.xml, po dodaniu konfiguracji wpis będzie wyglądał następująco:</p>
+
+<p>``` xml
+<plugin></p>
+
+<pre><code>&lt;groupId&gt;org.jacoco&lt;/groupId&gt;
+&lt;artifactId&gt;jacoco-maven-plugin&lt;/artifactId&gt;
+&lt;version&gt;0.7.1.201405082137&lt;/version&gt;
+&lt;executions&gt;
+    &lt;execution&gt;
+        &lt;id&gt;init-prepare-agent&lt;/id&gt;
+        &lt;goals&gt;
+            &lt;goal&gt;prepare-agent&lt;/goal&gt;
+        &lt;/goals&gt;
+        &lt;configuration&gt;
+            &lt;destFile&gt;${project.build.directory}/jacoco-cc/jacoco-ut.exec&lt;/destFile&gt;
+            &lt;propertyName&gt;surefireArgLine&lt;/propertyName&gt;
+        &lt;/configuration&gt;
+    &lt;/execution&gt;
+    &lt;execution&gt;
+        &lt;id&gt;unit-report&lt;/id&gt;
+        &lt;phase&gt;test&lt;/phase&gt;
+        &lt;goals&gt;
+            &lt;goal&gt;report&lt;/goal&gt;
+        &lt;/goals&gt;
+        &lt;configuration&gt;
+            &lt;dataFile&gt;${project.build.directory}/jacoco-cc/jacoco-ut.exec&lt;/dataFile&gt;
+            &lt;outputDirectory&gt;${project.reporting.outputDirectory}/jacoco-ut&lt;/outputDirectory&gt;
+        &lt;/configuration&gt;
+    &lt;/execution&gt;
+    &lt;execution&gt;
+        &lt;id&gt;integration-prepare-agent&lt;/id&gt;
+        &lt;goals&gt;
+            &lt;goal&gt;prepare-agent-integration&lt;/goal&gt;
+        &lt;/goals&gt;
+        &lt;configuration&gt;
+            &lt;destFile&gt;${project.build.directory}/jacoco-cc/jacoco-it.exec&lt;/destFile&gt;
+            &lt;propertyName&gt;failsafeArgLine&lt;/propertyName&gt;
+        &lt;/configuration&gt;
+    &lt;/execution&gt;
+    &lt;execution&gt;
+        &lt;id&gt;integration-report&lt;/id&gt;
+        &lt;phase&gt;verify&lt;/phase&gt;
+        &lt;goals&gt;
+            &lt;goal&gt;report-integration&lt;/goal&gt;
+        &lt;/goals&gt;
+        &lt;configuration&gt;
+            &lt;dataFile&gt;${project.build.directory}/jacoco-cc/jacoco-it.exec&lt;/dataFile&gt;
+            &lt;outputDirectory&gt;${project.reporting.outputDirectory}/jacoco-it&lt;/outputDirectory&gt;
+        &lt;/configuration&gt;
+    &lt;/execution&gt;
+&lt;/executions&gt;
+</code></pre>
+
+<p></plugin>
+```</p>
+
+<h3>Konfiguracja Maven Surefire Plugin</h3>
+
+<p>Aby zapewnić generowanie raportów razem z naszymi testami jednostkowymi, należy do konfiguracji pluginu <a href="http://maven.apache.org/">Maven`a</a> odpowiedzialnego za testy jednostkowe (<a href="http://maven.apache.org/surefire/maven-surefire-plugin/">Maven Surefire Plugin</a>) dodać argumenty wiersza poleceń wygenerowane w pluginie <a href="http://www.eclemma.org/jacoco/trunk/doc/maven.html">JaCoCo Maven Plugin</a>. Argumenty zostały zapisane w zmiennej <i>surefireArgLine</i>.
+Po zmianach definicja <a href="http://maven.apache.org/surefire/maven-surefire-plugin/">Maven Surefire Plugin</a> w pliku <i>pom.xml</i> powinna wyglądać następująco:</p>
+
+<p>``` xml
+<build></p>
+
+<pre><code>&lt;plugins&gt;
+...
+&lt;plugin&gt;
+    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+    &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
+    &lt;version&gt;2.17&lt;/version&gt;
+    &lt;configuration&gt;
+        &lt;excludes&gt;
+            &lt;exclude&gt;**/IT*.java&lt;/exclude&gt;
+        &lt;/excludes&gt;
+        &lt;argLine&gt;${surefireArgLine}&lt;/argLine&gt;
+    &lt;/configuration&gt;
+&lt;/plugin&gt;
+...
+&lt;/plugins&gt;
+</code></pre>
+
+<p></build>
+```</p>
+
+<p>W powyższej deklaracji można zauważyć dodatkowy wpis <i>exclude</i>. Ma on na celu odłączenie testów integracyjnych, które nie mają być uruchamiane razem z testami jednostkowymi. Wpis ten wymaga, aby wszystkie testy integracyjne były deklarowane w plikach o nazwie zaczynającej się od IT, przykładowo <i>ITExample.java</i>.</p>
+
+<h3>Konfiguracja Maven Failsafe Plugin</h3>
+
+<p>Konfiguracja Maven Failsafe Plugin, odpowiedzialnego za uruchamianie testów integracyjnych jest zbliżona do wcześniej wykonanej konfiguracji testów jednostkowych. Należy do konfiguracji <a href="http://maven.apache.org/surefire/maven-failsafe-plugin/">Maven Failsafe Plugin</a> dodać argumenty wiersza poleceń wygenerowane w pluginie <a href="http://www.eclemma.org/jacoco/trunk/doc/maven.html">JaCoCo Maven Plugin</a>. Argumenty zostały zapisane w zmiennej <i>failsafeArgLine</i>.
+Po zmianach definicja <a href="http://maven.apache.org/surefire/maven-failsafe-plugin/">Maven Failsafe Plugin</a> w pliku <i>pom.xml</i> powinna wyglądać następująco:</p>
+
+<p>```xml
+<build></p>
+
+<pre><code>&lt;plugins&gt;
+...
+&lt;plugin&gt;
+    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+    &lt;artifactId&gt;maven-failsafe-plugin&lt;/artifactId&gt;
+    &lt;version&gt;2.17&lt;/version&gt;
+    &lt;executions&gt;
+        &lt;execution&gt;
+            &lt;goals&gt;
+                &lt;goal&gt;integration-test&lt;/goal&gt;
+                &lt;goal&gt;verify&lt;/goal&gt;
+            &lt;/goals&gt;
+            &lt;configuration&gt;
+                &lt;argLine&gt;${failsafeArgLine}&lt;/argLine&gt;
+            &lt;/configuration&gt;
+        &lt;/execution&gt;
+    &lt;/executions&gt;
+&lt;/plugin&gt;
+...
+&lt;/plugins&gt;
+</code></pre>
+
+<p></build>
+```</p>
+
+<h3>Przykładowe testy</h3>
+
+<p>Gdy mamy wykonaną konfigurację <a href="http://www.eclemma.org/jacoco/">JaCoCo</a>, możemy przejść do pisania testów. Na potrzeby przykładu utworzę prostą klasę z jedną metodą, którą będziemy testować. Metoda będzie zwracała odpowiedni łańcuch znaków w zależności od podanego parametru. Jeżeli parametr będzie inny od oczekiwanego metoda rzuci wyjątek <i>IllegalArgumentException</i>.</p>
+
+<p>```java
+package pl.gruberski;</p>
+
+<p>public class Foobar {</p>
+
+<pre><code>public String getWord(int number) {
+
+    if(number == 1) {
+        return "Foo";
+    }
+    else if(number == 2) {
+        return "Bar";
+    }
+    else {
+        throw new IllegalArgumentException("invalid argument");
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Dla powyższej klasy tworzę podstawowe testy jednostkowe z wykorzystaniem <a href="http://junit.org/">JUnit</a>. Pomijam sprawdzanie wyjątku rzucanego przez metodę, aby lepiej zobrazować wyniki uzyskane w raporcie pokrycia kodu testami.</p>
+
+<p>```java
+package pl.gruberski;</p>
+
+<p>import static org.junit.Assert.*;</p>
+
+<p>import org.junit.Before;
+import org.junit.Test;</p>
+
+<p>public class FoobarTest {</p>
+
+<pre><code>private Foobar foobar;
+
+@Before
+public void setUp() {
+    foobar = new Foobar();
+}
+
+@Test
+public void getWordIfNumberIsOne() {
+    assertEquals(foobar.getWord(1), "Foo");
+}
+
+@Test
+public void getWordIfNumberIsTwo() {
+    assertEquals(foobar.getWord(2), "Bar");
+}
+</code></pre>
+
+<p>}
+```
+Tworzę także podstawowe testy integracyjne (na potrzeby przykładu wykorzystuje te same testy co przy testach jednostkowych). Należy pamiętać, aby plik z testami integracyjnymi miał odpowiednią nazwę pliku. Zgodnie z wcześniejszymi deklaracjami w konfiguracji, pliki z testami integracyjnymi muszą posiadać nazwę rozpoczynającą się od IT (<i>np. ITExample.java</i>).</p>
+
+<p>```java
+package pl.gruberski;</p>
+
+<p>import static org.junit.Assert.assertEquals;</p>
+
+<p>import org.junit.Before;
+import org.junit.Test;</p>
+
+<p>public class ITFoobarTest {</p>
+
+<p>private Foobar foobar;</p>
+
+<pre><code>@Before
+public void setUp() {
+    foobar = new Foobar();
+}
+
+@Test
+public void getWordIfNumberIsOne() {
+    assertEquals(foobar.getWord(1), "Foo");
+}
+
+@Test
+public void getWordIfNumberIsTwo() {
+   assertEquals(foobar.getWord(2), "Bar");
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h3>Uruchomienie testów</h3>
+
+<p>Gdy mamy już gotowe podstawowe testy, możemy przejść do ich uruchomienia. Wraz z testami wygenerowane zostaną raporty pokrycia kodu testami.</p>
+
+<pre><code>mvn clean test # uruchamianie testów jednostkowych wraz z generowaniem raportu
+mvn clean verify # uruchamianie testów jednostkowych i integracyjnych wraz z generowaniem raportu
+</code></pre>
+
+<h3>Wyniki testów i raport pokrycia kodu testami</h3>
+
+<p>Jeżeli konfiguracja została wykonana poprawnie i testy przebiegły pomyślnie, w katalogu <i>target/site</i> projektu powinny być dostępne raporty pokrycia kodu testami. Raporty dla testów jednostkowych i integracyjnych będą znajdowały się w osobnych folderach, których nazwy podaliśmy przy konfiguracji <a href="http://www.eclemma.org/jacoco/trunk/doc/maven.html">JaCoCo Maven Plugin</a>.</p>
+
+<p><img class="center" src="/images/jacoco-cc1.jpg"></p>
+
+<p>Jeżeli chcemy zapoznać się ze szczegółowym pokryciem kodu testami dla poszczególnych klas, wystarczy przeklikać strukturę projektu zaczynając od głównego pakietu (w tym przypadku <i>pl.gruberski</i>).</p>
+
+<br />
+
+
+<p><img class="center" src="/images/jacoco-cc2.jpg"></p>
+
+<p>Powyższy obrazek pokazuje, że kod klasy został w dużym stopniu pokryty testami. Brakuje jednak testu dla przypadku, w którym metoda rzuci wyjątek <i>IllegalArgumentException</i>.</p>
+
+<h3>Dodatkowe możliwości</h3>
+
+<p>Jeżeli chcielibyśmy mieć możliwość uruchamiania tylko testów integracyjnych (z pominięciem testów jednostkowych), możemy zastosować <a href="http://maven.apache.org/guides/introduction/introduction-to-profiles.html">profile kompilacji Maven`a</a>, które pozwalają na indywidualną konfigurację projektu w zależności od wybranego profilu. Być może opiszę to zagadnienie w niedalekiej przyszłości. Proszę o informację w komentarzu, jeżeli dla kogoś jest to temat interesujący i warty opisania.</p>
+
+<p>Narzędzie <a href="http://www.eclemma.org/jacoco/">JaCoCo</a> oprócz dostarczania surowego raportu na temat pokrycia kodu testami, idealnie nadaje się do integracji z serwerami <a href="http://en.wikipedia.org/wiki/Continuous_integration">Continuous Integration</a>. Planuje w jednym z kolejnych wpisów przyjrzeć się dokładniej serwerowi <a href="http://jenkins-ci.org/">Jenkins CI</a> oraz integracji go z wieloma ciekawymi rozwiązaniami (np. <a href="http://www.eclemma.org/jacoco/">JaCoCo</a>, <a href="http://checkstyle.sourceforge.net/">Checkstyle</a> itp.).</p>
+
+<h3>Podsumowanie</h3>
+
+<p>To by było na tyle. Zapraszam do dyskusji w komentarzach, wszelkie uwagi oraz sugestie na temat wpisu (lub bloga) są mile widziane.<br />
+Jest to mój pierwszy merytoryczny wpis, więc z góry przepraszam za błędy lub niejasne opisy. Postaram się, aby z każdym kolejnym wpisem było tylko lepiej.</p>
+
+<p>Cały projekt znajduje się w rapozytorium pod adresem <a href="https://github.com/gruberski/jacoco-code-coverage">https://github.com/gruberski/jacoco-code-coverage</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>
